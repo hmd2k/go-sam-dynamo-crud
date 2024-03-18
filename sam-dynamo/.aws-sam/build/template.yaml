@@ -46,7 +46,7 @@ Resources:
           Type: Api
           Properties:
             Path: /hello
-            Method: GET
+            Method: POST
       Environment:
         Variables:
           PARAM1: VALUE

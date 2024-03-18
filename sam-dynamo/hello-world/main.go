@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -18,9 +19,17 @@ type User struct {
 	email string `json:"email"`
 	name  string `json:"name"`
 }
+type InputForm struct {
+	Id string `json:"id"`
+}
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	fmt.Println("Lambda function called successfully!")
+	var inputForm InputForm
+	err := json.Unmarshal([]byte(request.Body), &inputForm)
+	if err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Invalid request body"}, nil
+	}
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String("us-east-1"), // Specify your desired AWS region
 	})
@@ -32,9 +41,9 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	fmt.Println("session created successfully!", db)
 	// Define the item to be inserted
 	user := User{
-		Id:    "2016",
-		email: "The Big New Movierrr",
-		name:  "Happy man",
+		Id:    string(inputForm.Id),
+		email: string(inputForm.Id) + "@gmail.com",
+		name:  string(inputForm.Id) + "Happy man",
 	}
 	input := &dynamodb.PutItemInput{
 		TableName: aws.String("MyTable"), // Replace with your table name
